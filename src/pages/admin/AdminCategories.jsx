@@ -54,7 +54,7 @@ export default function AdminCategories() {
     return (
         <Box>
             {/* Tiêu đề trang */}
-            <Typography variant="h4" gutterBottom color="primary">
+            <Typography variant="h4" gutterBottom color="primary" fontWeight="bold">
                 Quản lý danh mục chuyên ngành
             </Typography>
 

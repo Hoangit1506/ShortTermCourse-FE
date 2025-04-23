@@ -78,7 +78,7 @@ export default function AdminCourses() {
 
     return (
         <Box>
-            <Typography variant="h4" gutterBottom color="primary">
+            <Typography variant="h4" gutterBottom color="primary" fontWeight="bold">
                 Quản lý khóa học
             </Typography>
 

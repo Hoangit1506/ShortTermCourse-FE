@@ -35,10 +35,10 @@ export default function Header() {
 
         if (has('ADMIN')) {
             items.push(
-                { label: 'Danh mục', to: '/admin/categories' },
+                { label: 'Chuyên ngành', to: '/admin/categories' },
                 { label: 'Khóa học', to: '/admin/courses' },
                 { label: 'Giảng viên', to: '/admin/lecturers' },
-                { label: 'Lớp học', to: '/admin/classroom' },
+                { label: 'Lớp học', to: '/admin/classrooms' },
             );
         }
 
@@ -52,7 +52,7 @@ export default function Header() {
         if (!has('LECTURER') && !has('ADMIN')) {
             items.push(
                 { label: 'Hồ sơ', to: '/profile' },
-                { label: 'Khóa học của tôi', to: '/my-classes' },
+                { label: 'Khóa học của tôi', to: '/user/my-courses' },
             );
         }
 
@@ -78,8 +78,9 @@ export default function Header() {
                     <Box sx={{ flexGrow: 1, display: 'flex', gap: 2 }}>
                         <Button component={RouterLink} to="/" color="inherit">Trang chủ</Button>
                         <Button component={RouterLink} to="/categories" color="inherit">Danh mục chuyên ngành</Button>
+                        <Button component={RouterLink} to="/courses" color="inherit">Các khóa học</Button>
                         <Button component={RouterLink} to="/courses/open-course" color="inherit">
-                            Khóa học đang mở
+                            Danh sách lớp khóa học
                         </Button>
                     </Box>
 

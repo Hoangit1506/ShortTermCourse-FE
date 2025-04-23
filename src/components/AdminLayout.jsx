@@ -8,10 +8,10 @@ import HomeIcon from '@mui/icons-material/Home'; // Import icon
 
 export default function AdminLayout() {
     const menu = [
-        { label: 'Danh mục', to: '/admin/categories' },
+        { label: 'Chuyên ngành', to: '/admin/categories' },
         { label: 'Khóa học', to: '/admin/courses' },
         { label: 'Giảng viên', to: '/admin/lecturers' },
-        { label: 'Lớp học', to: '/admin/classroom' },
+        { label: 'Lớp học', to: '/admin/classrooms' },
     ];
 
     return (

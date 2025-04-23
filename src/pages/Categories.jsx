@@ -1,3 +1,4 @@
+// src/pages/Categories.jsx
 import { useEffect, useState } from "react";
 import {
     Box, Typography, Container, Grid, Card, CardMedia,
@@ -9,20 +10,19 @@ import Header from "../components/Header";
 import Footer from '../components/Footer';
 import api from "../api/axios";
 
-
 export default function Categories() {
     const [categories, setCategories] = useState([]);
 
     useEffect(() => {
+        // 1. Lấy danh sách chuyên ngành
         api.get("/api/categories?size=100")
             .then(res => {
                 const cats = res.data.data.content;
-                return Promise.all(
-                    cats.map(cat =>
-                        api.get(`/api/courses?categoryId=${cat.id}&size=100`)
-                            .then(r => ({ ...cat, courses: r.data.data.content }))
-                    )
-                );
+                // 2. Với mỗi chuyên ngành, fetch các khóa học
+                return Promise.all(cats.map(cat =>
+                    api.get("/api/courses", { params: { categoryId: cat.id, size: 100 } })
+                        .then(r => ({ ...cat, courses: r.data.data.content }))
+                ));
             })
             .then(setCategories)
             .catch(console.error);
@@ -105,68 +105,60 @@ export default function Categories() {
                                 </Typography>
                             ) : (
                                 <>
-                                    <Grid container spacing={3}>
+                                    <Grid container spacing={3} alignItems="stretch">
                                         {cat.courses.slice(0, 8).map(course => (
                                             <Grid item xs={12} sm={6} md={3} key={course.id}>
                                                 <Card
                                                     elevation={3}
                                                     sx={{
-                                                        height: "100%",                // Card chiếm hết cell
+                                                        height: "100%",           // fill height
                                                         display: "flex",
                                                         flexDirection: "column",
                                                         borderRadius: 2,
                                                         transition: "transform 0.2s",
-                                                        "&:hover": { transform: "translateY(-4px)", boxShadow: 6 }
+                                                        "&:hover": { transform: "translateY(-4px)", boxShadow: 6 },
                                                     }}
                                                 >
-
                                                     <CardActionArea
                                                         component={RouterLink}
                                                         to={`/courses/${course.id}`}
                                                         sx={{
-                                                            flexGrow: 1,                  // kéo dài phần này
+                                                            flexGrow: 1,          // stretch clickable area
                                                             display: "flex",
                                                             flexDirection: "column",
                                                         }}
                                                     >
-
-                                                        <Box sx={{ flexBasis: "50%", overflow: "hidden" }}>
+                                                        <Box sx={{ height: 150, overflow: "hidden" }}>
                                                             <CardMedia
                                                                 component="img"
                                                                 image={course.thumbnail}
                                                                 alt={course.name}
-                                                                sx={{
-                                                                    width: "100%",
-                                                                    height: "100%",
-                                                                    objectFit: "cover"
-                                                                }}
+                                                                sx={{ width: "100%", height: "100%", objectFit: "cover" }}
                                                             />
                                                         </Box>
 
-                                                        <CardContent
-                                                            sx={{
-                                                                flexGrow: 1,
-                                                                display: "flex",
-                                                                flexDirection: "column",
-                                                                justifyContent: "center",
-                                                                alignItems: "center",
-                                                                textAlign: "center",
-                                                                p: 2
-                                                            }}
-                                                        >
-
-                                                            <Typography variant="h6" noWrap>
+                                                        <CardContent sx={{
+                                                            flexGrow: 1,        // push actions to bottom
+                                                            display: "flex",
+                                                            flexDirection: "column",
+                                                            justifyContent: "center",
+                                                            alignItems: "center",
+                                                            textAlign: "center",
+                                                            p: 2
+                                                        }}>
+                                                            <Typography
+                                                                variant="h6"
+                                                                sx={{
+                                                                    display: "-webkit-box",
+                                                                    WebkitLineClamp: 2,
+                                                                    WebkitBoxOrient: "vertical",
+                                                                    overflow: "hidden",
+                                                                    fontWeight: "bold"
+                                                                }}
+                                                            >
                                                                 {course.name}
                                                             </Typography>
-
-                                                            <Typography variant="subtitle1" sx={{ mt: 1, fontWeight: "bold" }}>
-                                                                Giá khóa học:
-                                                                {new Intl.NumberFormat("vi-VN", {
-                                                                    style: "currency",
-                                                                    currency: "VND",
-                                                                    maximumFractionDigits: 0
-                                                                }).format(course.price)}
-                                                            </Typography>
+                                                            <Box sx={{ flexGrow: 1 }} />
                                                         </CardContent>
                                                     </CardActionArea>
 
@@ -184,92 +176,6 @@ export default function Categories() {
                                             </Grid>
                                         ))}
                                     </Grid>
-
-                                    {/* <Grid container spacing={3}>
-                                        {cat.courses.slice(0, 8).map(course => (
-                                            <Grid item xs={12} sm={6} md={3} key={course.id}>
-                                                <Card
-                                                    elevation={3}
-                                                    sx={{
-                                                        height: "100%",              // card full cell
-                                                        display: "flex",
-                                                        flexDirection: "column",
-                                                        borderRadius: 2,
-                                                        transition: "transform 0.2s",
-                                                        "&:hover": { transform: "translateY(-4px)", boxShadow: 6 }
-                                                    }}
-                                                >
-                                                    <CardActionArea
-                                                        component={RouterLink}
-                                                        to={`/courses/${course.id}`}
-                                                        sx={{
-                                                            height: "calc(100% - 48px)", // trừ phần CardActions
-                                                            display: "flex",
-                                                            flexDirection: "column",
-                                                        }}
-                                                    >
-
-                                                        <Box sx={{ flexBasis: "50%", overflow: "hidden" }}>
-                                                            <CardMedia
-                                                                component="img"
-                                                                image={course.thumbnail}
-                                                                alt={course.name}
-                                                                sx={{
-                                                                    width: "100%",
-                                                                    height: "100%",
-                                                                    objectFit: "cover"
-                                                                }}
-                                                            />
-                                                        </Box>
-
-                                                        <CardContent
-                                                            sx={{
-                                                                height: 80,
-                                                                px: 2,
-                                                                display: "flex",
-                                                                flexDirection: "column",
-                                                                justifyContent: "center",
-                                                                textAlign: "center",
-                                                                overflow: "hidden"
-                                                            }}
-                                                        >
-                                                            <Typography
-                                                                variant="subtitle1"
-                                                                sx={{
-                                                                    display: "-webkit-box",
-                                                                    WebkitLineClamp: 2,
-                                                                    WebkitBoxOrient: "vertical",
-                                                                    overflow: "hidden",
-                                                                    fontWeight: "bold"
-                                                                }}
-                                                            >
-                                                                {course.name}
-                                                            </Typography>
-
-                                                            <Typography variant="body2" sx={{ mt: 1, color: "primary.main" }}>
-                                                                {new Intl.NumberFormat("vi-VN", {
-                                                                    style: "currency",
-                                                                    currency: "VND",
-                                                                    maximumFractionDigits: 0
-                                                                }).format(course.price)}
-                                                            </Typography>
-                                                        </CardContent>
-                                                    </CardActionArea>
-
-                                                    <CardActions sx={{ height: 48, justifyContent: "center" }}>
-                                                        <Button
-                                                            size="small"
-                                                            variant="contained"
-                                                            component={RouterLink}
-                                                            to={`/courses/${course.id}`}
-                                                        >
-                                                            Xem chi tiết
-                                                        </Button>
-                                                    </CardActions>
-                                                </Card>
-                                            </Grid>
-                                        ))}
-                                    </Grid> */}
 
                                     {cat.courses.length > 8 && (
                                         <Box mt={2} textAlign="right">
