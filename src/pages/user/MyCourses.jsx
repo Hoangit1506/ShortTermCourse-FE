@@ -1,129 +1,151 @@
 // src/pages/user/MyCourses.jsx
 import { useEffect, useState } from "react";
 import {
-    Container, Typography, Box, Grid, Card, CardContent, CardActions, Button,
-    FormControl, InputLabel, Select, MenuItem, TextField, TablePagination
+    Container, Typography, Box, Table, TableBody, TableCell, TableContainer,
+    TableHead, TableRow, Paper, Button, TablePagination, TextField, Alert
 } from "@mui/material";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useLocation } from "react-router-dom";
 import dayjs from "dayjs";
 import api from "../../api/axios";
 
+const learningStatusMap = {
+    REGISTERED: 'Đã đăng ký',
+    IN_PROGRESS: 'Đang học',
+    COMPLETED: 'Hoàn thành',
+    DROPPED: 'Đã hủy'
+};
+
+const tuitionStatusMap = {
+    UNPAID: 'Chưa thanh toán',
+    PAID: 'Đã thanh toán',
+    REFUNDED: 'Đã hoàn tiền'
+};
+
 export default function MyCourses() {
-    const [categories, setCategories] = useState([]);
-    const [filter, setFilter] = useState({ categoryId: "", keyword: "" });
+    const location = useLocation();
     const [data, setData] = useState([]);
     const [total, setTotal] = useState(0);
-    const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [page, setPage] = useState(location.state?.page || 0);
+    const [rowsPerPage, setRowsPerPage] = useState(location.state?.rowsPerPage || 10);
+    const [keyword, setKeyword] = useState(location.state?.keyword || "");
 
-    // Load danh sách chuyên ngành
     useEffect(() => {
-        api.get("/api/categories?size=100").then(res => {
-            setCategories(res.data.data.content);
-        });
-    }, []);
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            window.location.href = '/login';
+            return;
+        }
 
-    // Load danh sách lớp học đã đăng ký
-    useEffect(() => {
-        const params = {
-            page,
-            size: rowsPerPage,
-            ...filter
-        };
-        api.get("/api/members/my-courses", { params }).then(res => {
-            const { content, totalElements } = res.data.data;
-            setData(content);
-            setTotal(totalElements);
-        });
-    }, [filter, page, rowsPerPage]);
+        const params = { page, size: rowsPerPage, keyword: keyword || undefined };
+        api.get("/api/members/my-courses", { params })
+            .then(res => {
+                console.log("Dữ liệu trả về:", res.data.data.content);
+                const { content, totalElements } = res.data.data;
+                setData(content);
+                setTotal(totalElements);
+            })
+            .catch(error => {
+                console.error("Lỗi khi tải dữ liệu:", error);
+                if (error.response) {
+                    console.log("Chi tiết lỗi từ server:", error.response.data);
+                }
+                alert("Không thể tải danh sách lớp học. Vui lòng thử lại!");
+            });
+    }, [page, rowsPerPage, keyword]);
 
-    // Hủy đăng ký lớp học
     const handleCancel = (classroomId) => {
         if (!window.confirm("Bạn có chắc muốn hủy đăng ký lớp này?")) return;
-        api.delete(`/api/members/delete/${classroomId}`).then(() => {
-            setData(d => d.filter(m => m.classroomId !== classroomId));
-            setTotal(t => t - 1);
-        });
+        api.delete(`/api/members/delete/${classroomId}`)
+            .then(() => {
+                setData(d => d.filter(m => m.classroomId !== classroomId));
+                setTotal(t => t - 1);
+            })
+            .catch(error => {
+                console.error("Lỗi khi hủy đăng ký:", error);
+                alert("Hủy đăng ký thất bại!");
+            });
     };
 
     return (
         <Container sx={{ py: 4 }}>
             <Typography variant="h4" gutterBottom color="primary">
-                Khóa học của tôi
+                Lớp học của tôi
             </Typography>
 
-            {/* Bộ lọc */}
-            <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
-                <FormControl size="small" sx={{ minWidth: 200 }}>
-                    <InputLabel>Chuyên ngành</InputLabel>
-                    <Select
-                        label="Chuyên ngành"
-                        value={filter.categoryId}
-                        onChange={e => {
-                            setFilter(f => ({ ...f, categoryId: e.target.value }));
-                            setPage(0);
-                        }}
-                    >
-                        <MenuItem value="">Tất cả</MenuItem>
-                        {categories.map(c => (
-                            <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
-
+            <Box sx={{ mb: 3 }}>
                 <TextField
                     size="small"
-                    label="Tìm kiếm"
-                    value={filter.keyword}
+                    label="Tìm kiếm theo tên lớp học"
+                    value={keyword}
                     onChange={e => {
-                        setFilter(f => ({ ...f, keyword: e.target.value }));
+                        setKeyword(e.target.value);
                         setPage(0);
                     }}
+                    sx={{ width: 300 }}
                 />
             </Box>
 
-            {/* Danh sách lớp học */}
-            <Grid container spacing={3}>
-                {data.map(m => {
-                    const expired = dayjs().isAfter(dayjs(m.startDate), 'day');
-                    return (
-                        <Grid item xs={12} sm={6} md={4} key={m.classroomId}>
-                            <Card>
-                                <CardContent>
-                                    <Typography variant="h6" gutterBottom>{m.classroomName}</Typography>
-                                    <Typography variant="body2">Khóa học: {m.courseName}</Typography>
-                                    <Typography variant="body2">
-                                        {dayjs(m.startDate).format('DD/MM/YYYY')} → {dayjs(m.endDate).format('DD/MM/YYYY')}
-                                    </Typography>
-                                    <Typography variant="body2">Địa điểm: {m.place}</Typography>
-                                </CardContent>
-                                <CardActions>
-                                    <Button
-                                        variant="contained"
-                                        size="small"
-                                        component={RouterLink}
-                                        to={`/classrooms/${m.classroomId}`}
-                                    >
-                                        Xem thông tin
-                                    </Button>
-                                    {!expired && (
-                                        <Button
-                                            variant="outlined"
-                                            size="small"
-                                            color="error"
-                                            onClick={() => handleCancel(m.classroomId)}
-                                        >
-                                            Hủy đăng ký
-                                        </Button>
-                                    )}
-                                </CardActions>
-                            </Card>
-                        </Grid>
-                    );
-                })}
-            </Grid>
+            {data.length === 0 ? (
+                <Alert severity="info" sx={{ mb: 3 }}>
+                    Bạn chưa đăng ký lớp khóa học nào!
+                </Alert>
+            ) : (
+                <>
+                    <TableContainer component={Paper}>
+                        <Table sx={{ minWidth: 650 }} aria-label="danh sách lớp học">
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell sx={{ fontWeight: 'bold' }}>STT</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold' }}>Tên lớp học</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold' }}>Giảng viên</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold' }}>Trạng thái học</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold' }}>Học phí</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold' }}>Điểm số</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold' }} align="center">Hành động</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {data.map((m, index) => {
+                                    const expired = dayjs().isAfter(dayjs(m.startDate), 'day');
+                                    return (
+                                        <TableRow key={m.classroomId}>
+                                            <TableCell>{page * rowsPerPage + index + 1}</TableCell>
+                                            <TableCell>{m.classroomName}</TableCell>
+                                            <TableCell>{m.lecturerName}</TableCell>
+                                            <TableCell>{learningStatusMap[m.learningStatus] || 'Không xác định'}</TableCell>
+                                            <TableCell>{tuitionStatusMap[m.tuitionStatus] || 'Không xác định'}</TableCell>
+                                            <TableCell>{m.score != null ? m.score : '-'}</TableCell>
+                                            <TableCell align="center">
+                                                <Button
+                                                    variant="contained"
+                                                    size="small"
+                                                    component={RouterLink}
+                                                    to={`/user/classrooms/${m.classroomId}`}
+                                                    state={{ keyword, page, rowsPerPage }}
+                                                    sx={{ mr: 1 }}
+                                                >
+                                                    Xem thông tin
+                                                </Button>
+                                                {!expired && (
+                                                    <Button
+                                                        variant="outlined"
+                                                        size="small"
+                                                        color="error"
+                                                        onClick={() => handleCancel(m.classroomId)}
+                                                    >
+                                                        Hủy đăng ký
+                                                    </Button>
+                                                )}
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </>
+            )}
 
-            {/* Phân trang */}
             <Box sx={{ mt: 4, display: "flex", justifyContent: "center" }}>
                 <TablePagination
                     component="div"

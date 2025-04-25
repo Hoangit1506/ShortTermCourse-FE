@@ -40,7 +40,6 @@ export default function AdminLecturers() {
         if (rowsPerPage) params.size = rowsPerPage;
         setSearchParams(params, { replace: true });
         fetchLecturers(params);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [search, selectedCategory, page, rowsPerPage]);
 
     const fetchLecturers = (params = {}) => {

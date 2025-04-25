@@ -26,20 +26,16 @@ export default function AdminClassroomEdit() {
     const [lecturers, setLecturers] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    // Tải dữ liệu lớp học, tìm categoryId từ course để lọc giảng viên
     useEffect(() => {
         const loadData = async () => {
             try {
-                // 1️⃣ Lấy thông tin lớp học
                 const res = await api.get(`/api/classrooms/${id}`);
                 const classroom = res.data.data;
 
-                // 2️⃣ Lấy thông tin khóa học (để lấy categoryId)
                 const courseRes = await api.get(`/api/courses/${classroom.courseId}`);
                 const course = courseRes.data.data;
                 const categoryId = course.categoryId;
 
-                // 3️⃣ Lấy toàn bộ giảng viên, lọc theo chuyên ngành
                 const lecRes = await api.get('/api/lecturers', { params: { size: 100 } });
                 const allLecturers = lecRes.data.data.content;
                 const filteredLecturers = allLecturers.filter(l =>
@@ -47,7 +43,6 @@ export default function AdminClassroomEdit() {
                 );
                 setLecturers(filteredLecturers);
 
-                // 4️⃣ Gán dữ liệu form
                 setForm({
                     name: classroom.name,
                     lecturerId: classroom.lecturerId,

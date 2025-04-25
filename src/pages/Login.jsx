@@ -17,7 +17,6 @@ export default function Login() {
     const [form, setForm] = useState({ email: "", password: "", remember: false });
     const [error, setError] = useState("");
 
-    // nếu Google redirect ?error
     useEffect(() => {
         if (oauthError) setError("Bạn đã hủy đăng nhập Google.");
     }, [oauthError]);
@@ -39,7 +38,6 @@ export default function Login() {
     };
 
     const handleGoogle = () => {
-        // trỏ đúng endpoint OAuth2 của backend
         window.location.href = "http://localhost:8080/short-term-course/oauth2/authorization/google";
     };
 

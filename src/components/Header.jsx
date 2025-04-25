@@ -35,6 +35,7 @@ export default function Header() {
 
         if (has('ADMIN')) {
             items.push(
+                // { label: 'Hồ sơ', to: '/profile' },
                 { label: 'Chuyên ngành', to: '/admin/categories' },
                 { label: 'Khóa học', to: '/admin/courses' },
                 { label: 'Giảng viên', to: '/admin/lecturers' },
@@ -44,14 +45,14 @@ export default function Header() {
 
         if (!has('ADMIN') && has('LECTURER')) {
             items.push(
-                { label: 'Hồ sơ', to: '/profile' },
+                // { label: 'Hồ sơ', to: '/profile' },
                 { label: 'Lớp của tôi', to: '/lecturer/classes' },
             );
         }
 
         if (!has('LECTURER') && !has('ADMIN')) {
             items.push(
-                { label: 'Hồ sơ', to: '/profile' },
+                // { label: 'Hồ sơ', to: '/profile' },
                 { label: 'Khóa học của tôi', to: '/user/my-courses' },
             );
         }

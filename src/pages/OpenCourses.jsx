@@ -15,10 +15,8 @@ import api from "../api/axios";
 export default function OpenCourses() {
     const [searchParams, setSearchParams] = useSearchParams();
 
-    // 1️⃣ Đọc query‑params (hoặc mặc định)
     const categoryParam = searchParams.get("categoryId") || "";
     const keywordParam = searchParams.get("keyword") || "";
-    // const startParam = searchParams.get("startDate") || dayjs().format("YYYY-MM-DD");
 
     const startParam = searchParams.has("startDate")
         ? (searchParams.get("startDate") || "")
@@ -27,11 +25,9 @@ export default function OpenCourses() {
         ? (searchParams.get("endDate") || "")
         : "";
 
-    // const endParam = searchParams.get("endDate") || "";
     const pageParam = parseInt(searchParams.get("page") || "0", 10);
     const sizeParam = parseInt(searchParams.get("size") || "10", 10);
 
-    // 2️⃣ Local state gắn với query‑params
     const [filter, setFilter] = useState({
         categoryId: categoryParam,
         keyword: keywordParam,
@@ -44,16 +40,13 @@ export default function OpenCourses() {
     const [total, setTotal] = useState(0);
     const [categories, setCategories] = useState([]);
 
-    // 3️⃣ Load danh sách chuyên ngành (chỉ 1 lần)
     useEffect(() => {
         api.get("/api/categories?size=100")
             .then(res => setCategories(res.data.data.content))
             .catch(console.error);
     }, []);
 
-    // 4️⃣ Mỗi khi filter/page/rowsPerPage thay đổi => cập nhật URL & fetch lại
     useEffect(() => {
-        // a) Cập nhật query‑params
         const params = {
             page: page.toString(),
             size: rowsPerPage.toString()
@@ -64,11 +57,9 @@ export default function OpenCourses() {
         if (filter.endDate) params.endDate = filter.endDate;
         setSearchParams(params, { replace: true });
 
-        // b) Gọi API
         api.get("/api/classrooms", { params })
             .then(res => {
                 const { content, totalElements } = res.data.data;
-                // client‑side sort theo khoảng cách tới ngày hôm nay, rồi tên
                 const today = dayjs();
                 content.sort((a, b) => {
                     const da = Math.abs(today.diff(dayjs(a.startDate), "day"));
@@ -82,7 +73,6 @@ export default function OpenCourses() {
             .catch(console.error);
     }, [filter, page, rowsPerPage, setSearchParams]);
 
-    // 5️⃣ Handlers
     const handleFilterChange = e => {
         const { name, value } = e.target;
         setFilter(f => ({ ...f, [name]: value }));
@@ -102,7 +92,6 @@ export default function OpenCourses() {
                     Danh sách lớp khóa học
                 </Typography>
 
-                {/* ===== Filters ===== */}
                 <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mb: 3, alignItems: "center" }}>
                     <FormControl size="small" sx={{ minWidth: 200 }}>
                         <InputLabel>Chuyên ngành</InputLabel>
@@ -147,7 +136,6 @@ export default function OpenCourses() {
                     />
                 </Box>
 
-                {/* ===== Grid lớp ===== */}
                 <Grid container spacing={3}>
                     {classrooms.map(cl => (
                         <Grid item xs={12} sm={6} md={4} key={cl.id}>
@@ -193,7 +181,6 @@ export default function OpenCourses() {
                                     </CardContent>
                                 </CardActionArea>
 
-                                {/* nếu vẫn muốn nút riêng */}
                                 <CardActions sx={{ justifyContent: "center", p: 1 }}>
                                     <Button
                                         size="small"
@@ -209,7 +196,6 @@ export default function OpenCourses() {
                     ))}
                 </Grid>
 
-                {/* ===== Pagination ===== */}
                 <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
                     <TablePagination
                         component="div"

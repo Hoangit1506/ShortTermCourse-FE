@@ -16,6 +16,7 @@ import ClassroomDetail from '../pages/ClassroomDetail'
 import AdminLayout from '../components/AdminLayout'
 import UserLayout from '../components/UserLayout'
 import MyCourses from '../pages/user/MyCourses'
+import UserClassroomDetail from '../pages/user/UserClassroomDetail'
 import AdminCategories from '../pages/admin/AdminCategories'
 import AdminCourses from '../pages/admin/AdminCourses'
 import CourseCreate from '../pages/admin/CourseCreate'
@@ -39,7 +40,6 @@ function Protected({ children, roles }) {
         return <Navigate to="/login" replace />;
     }
 
-    // Kiểm tra nếu user không có bất kỳ quyền nào trong `roles`
     if (roles && !roles.some(role => user.roles.includes(role))) {
         return <Navigate to="/login" replace />;
     }
@@ -51,12 +51,10 @@ export default function AppRouter() {
     return (
         <BrowserRouter>
             <Routes>
-                {/* Homepage, không cần layout auth */}
                 <Route path="/" element={<HomePage />} />
 
                 <Route path="/auth/receive-tokens" element={<ReceiveTokens />} />
 
-                {/* Tất cả route auth sẽ dùng chung AuthLayout */}
                 <Route element={<AuthLayoutWrapper />}>
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
@@ -80,10 +78,10 @@ export default function AppRouter() {
                     }
                 >
                     <Route path="my-courses" element={<MyCourses />} />
+                    <Route path="classrooms/:classroomId" element={<UserClassroomDetail />} />
                 </Route>
 
 
-                {/* Admin routes */}
                 <Route
                     path="/admin"
                     element={

@@ -1,3 +1,4 @@
+// src/pages/admin/AdminCategories.jsx
 import { useState, useEffect } from 'react';
 import {
     Box, Button, Dialog, DialogTitle, DialogContent, DialogActions,
@@ -20,26 +21,44 @@ export default function AdminCategories() {
             params: {
                 page,
                 size: rowsPerPage,
-                search: search || undefined, // Gửi tham số tìm kiếm nếu có
+                search: search || undefined,
             },
         }).then(r => {
             setCats(r.data.data.content);
             setTotalItems(r.data.data.totalElements);
+        }).catch(error => {
+            console.error("Lỗi khi tải danh mục:", error);
+            alert("Không thể tải danh sách danh mục. Vui lòng thử lại!");
         });
     };
 
     useEffect(fetch, [page, rowsPerPage, search]);
 
     const handleSave = async () => {
-        if (form.id) await api.put(`/api/categories/update/${form.id}`, form);
-        else await api.post('/api/categories/create', form);
-        setOpen(false);
-        fetch();
+        try {
+            if (form.id) {
+                await api.put(`/api/categories/update/${form.id}`, form);
+            } else {
+                await api.post('/api/categories/create', form);
+            }
+            setOpen(false);
+            fetch();
+        } catch (error) {
+            console.error("Lỗi khi lưu danh mục:", error);
+            alert("Không thể lưu danh mục. Vui lòng thử lại!");
+        }
     };
 
     const handleDelete = async (id) => {
-        await api.delete(`/api/categories/delete/${id}`);
-        fetch();
+        if (window.confirm("Bạn chắc chắn muốn xóa chuyên ngành này?")) {
+            try {
+                await api.delete(`/api/categories/delete/${id}`);
+                fetch();
+            } catch (error) {
+                console.error("Lỗi khi xóa danh mục:", error);
+                alert("Không thể xóa danh mục. Có thể danh mục đang được sử dụng!");
+            }
+        }
     };
 
     const handleChangePage = (event, newPage) => {
@@ -48,17 +67,15 @@ export default function AdminCategories() {
 
     const handleChangeRowsPerPage = (event) => {
         setRowsPerPage(parseInt(event.target.value, 10));
-        setPage(0); // Reset về trang đầu tiên
+        setPage(0);
     };
 
     return (
         <Box>
-            {/* Tiêu đề trang */}
             <Typography variant="h4" gutterBottom color="primary" fontWeight="bold">
                 Quản lý danh mục chuyên ngành
             </Typography>
 
-            {/* Thanh tìm kiếm */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
                 <TextField
                     label="Tìm kiếm"
@@ -72,7 +89,6 @@ export default function AdminCategories() {
                 </Button>
             </Box>
 
-            {/* Bảng danh mục */}
             <Table>
                 <TableHead>
                     <TableRow>
@@ -84,7 +100,6 @@ export default function AdminCategories() {
                 <TableBody>
                     {cats.map((c, index) => (
                         <TableRow key={c.id}>
-                            {/* Số thứ tự */}
                             <TableCell>{page * rowsPerPage + index + 1}</TableCell>
                             <TableCell>{c.name}</TableCell>
                             <TableCell align="right">
@@ -100,7 +115,6 @@ export default function AdminCategories() {
                 </TableBody>
             </Table>
 
-            {/* Phân trang */}
             <TablePagination
                 component="div"
                 count={totalItems}
@@ -111,7 +125,6 @@ export default function AdminCategories() {
                 rowsPerPageOptions={[5, 10, 25]}
             />
 
-            {/* Dialog thêm/sửa danh mục */}
             <Dialog open={open} onClose={() => setOpen(false)}>
                 <DialogTitle>{form.id ? 'Cập nhật' : 'Tạo mới'} Danh mục</DialogTitle>
                 <DialogContent>

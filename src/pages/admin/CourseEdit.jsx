@@ -22,10 +22,8 @@ export default function CourseEdit() {
         description: '',
         content: '',
         price: '',
-        // existing URLs
         thumbnail: '',
         promoVideo: '',
-        // for new uploads
         thumbnailFile: null,
         thumbnailPreview: null,
         promoVideoFile: null,
@@ -36,7 +34,6 @@ export default function CourseEdit() {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    // Load categories + course data
     useEffect(() => {
         api.get('/api/categories?size=100')
             .then(res => setCategories(res.data.data.content))
@@ -60,7 +57,6 @@ export default function CourseEdit() {
             .catch(console.error);
     }, [id]);
 
-    // Cleanup object URLs
     useEffect(() => (
         () => {
             if (form.thumbnailPreview) URL.revokeObjectURL(form.thumbnailPreview);
@@ -68,7 +64,6 @@ export default function CourseEdit() {
         }
     ), [form.thumbnailPreview, form.promoVideoPreview]);
 
-    // Delete existing thumbnail
     const handleDeleteThumbnail = async () => {
         if (!form.thumbnail) return;
         try {
@@ -81,7 +76,6 @@ export default function CourseEdit() {
         }
     };
 
-    // Delete existing video
     const handleDeleteVideo = async () => {
         if (!form.promoVideo) return;
         try {
@@ -97,7 +91,6 @@ export default function CourseEdit() {
     const handleSubmit = async () => {
         setLoading(true);
         try {
-            // 1️⃣ Chuẩn bị payload metadata
             const payload = {
                 name: form.name,
                 categoryId: form.categoryId,
@@ -105,17 +98,13 @@ export default function CourseEdit() {
                 description: form.description,
                 content: form.content,
                 price: form.price,
-                // nếu user đánh dấu xóa và không chọn file mới -> clear URL
                 ...(form.thumbnailRemoved && !form.thumbnailFile ? { thumbnail: '' } : {}),
                 ...(form.videoRemoved && !form.promoVideoFile ? { promoVideo: '' } : {}),
             };
 
-            // Gửi update metadata (bao gồm clear URL nếu cần)
             await api.put(`/api/courses/update/${id}`, payload);
 
-            // 2️⃣ Nếu có file thumbnail mới -> upload, overwrite
             if (form.thumbnailFile) {
-                // nếu trước đó đã có URL cũ và chưa xóa qua bước metadata, xóa thủ công
                 if (form.thumbnail && !form.thumbnailRemoved) {
                     await api.delete('/api/uploads', { params: { url: form.thumbnail } });
                 }
@@ -126,7 +115,6 @@ export default function CourseEdit() {
                 await api.put(`/api/courses/update/${id}`, { thumbnail: newThumb });
             }
 
-            // 3️⃣ Nếu có file video mới -> upload, overwrite
             if (form.promoVideoFile) {
                 if (form.promoVideo && !form.videoRemoved) {
                     await api.delete('/api/uploads', { params: { url: form.promoVideo } });
@@ -155,7 +143,6 @@ export default function CourseEdit() {
                 Chỉnh sửa khóa học
             </Typography>
 
-            {/* Name */}
             <TextField
                 label="Tên khóa học"
                 fullWidth margin="dense"
@@ -163,7 +150,6 @@ export default function CourseEdit() {
                 onChange={e => setForm({ ...form, name: e.target.value })}
             />
 
-            {/* Category */}
             <TextField
                 label="Chuyên ngành" select fullWidth margin="dense"
                 value={form.categoryId}
@@ -174,14 +160,12 @@ export default function CourseEdit() {
                 ))}
             </TextField>
 
-            {/* Price */}
             <TextField
                 label="Giá (VND)" fullWidth type="number" margin="dense"
                 value={form.price}
                 onChange={e => setForm({ ...form, price: e.target.value })}
             />
 
-            {/* Markdown fields */}
             <Box mt={2}>
                 <Typography fontWeight="bold">Đối tượng phù hợp (Markdown)</Typography>
                 <MDEditor
@@ -204,7 +188,6 @@ export default function CourseEdit() {
                 />
             </Box>
 
-            {/* Thumbnail upload */}
             <Box mt={2} sx={{ textAlign: 'center' }}>
                 <Button variant="outlined" component="label">
                     Chọn ảnh thumbnail
@@ -235,8 +218,8 @@ export default function CourseEdit() {
                         <Button color="error" onClick={() =>
                             setForm(f => ({
                                 ...f,
-                                thumbnailRemoved: true,    // đánh dấu xóa
-                                thumbnail: '',             // clear URL cũ
+                                thumbnailRemoved: true,
+                                thumbnail: '',
                                 thumbnailFile: null,
                                 thumbnailPreview: null
                             }))
@@ -247,7 +230,6 @@ export default function CourseEdit() {
                 ) : null}
             </Box>
 
-            {/* Promo Video upload */}
             <Box mt={2} sx={{ textAlign: 'center' }}>
                 <Button variant="outlined" component="label">
                     Chọn video giới thiệu
@@ -295,7 +277,6 @@ export default function CourseEdit() {
                 ) : null}
             </Box>
 
-            {/* Actions */}
             <Box mt={3}>
                 <Button variant="contained" onClick={handleSubmit} disabled={loading}>
                     {loading ? <CircularProgress size={24} /> : 'Lưu thay đổi'}

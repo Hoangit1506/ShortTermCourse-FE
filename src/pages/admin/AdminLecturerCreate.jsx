@@ -87,7 +87,6 @@ export default function AdminLecturerCreate() {
                 onChange={e => setForm({ ...form, displayName: e.target.value })}
             />
 
-            {/* Select chuyên ngành */}
             <FormControl fullWidth margin="dense">
                 <InputLabel>Chuyên ngành</InputLabel>
                 <Select
@@ -104,7 +103,6 @@ export default function AdminLecturerCreate() {
                 </Select>
             </FormControl>
 
-            {/* Hiển thị chuyên ngành đã chọn với nút xóa riêng */}
             <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                 {form.specializationIds.map(id => {
                     const name = categories.find(c => c.id === id)?.name || id;
@@ -161,7 +159,6 @@ export default function AdminLecturerCreate() {
                 onChange={e => setForm({ ...form, degree: e.target.value })}
             />
 
-            {/* Upload avatar */}
             <Box mt={2} sx={{ textAlign: 'center' }}>
                 <Button variant="outlined" component="label">
                     Chọn ảnh đại diện
@@ -192,7 +189,6 @@ export default function AdminLecturerCreate() {
                 )}
             </Box>
 
-            {/* Actions */}
             <Box mt={3}>
                 <Button variant="contained" onClick={handleSubmit} disabled={loading}>
                     {loading ? <CircularProgress size={24} /> : 'Lưu'}

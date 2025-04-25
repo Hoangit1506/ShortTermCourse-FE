@@ -19,14 +19,12 @@ export default function CourseDetail() {
     const [upcoming, setUpcoming] = useState([])
     const [searchParams] = useSearchParams();
 
-    // 1️⃣ Load thông tin khóa học
     useEffect(() => {
         api.get(`/api/courses/${id}`)
             .then(res => setCourse(res.data.data))
             .catch(console.error)
     }, [id])
 
-    // 2️⃣ Load các lớp sắp mở của khóa này
     useEffect(() => {
         if (!course) return
         const today = dayjs().format('YYYY-MM-DD')
@@ -48,12 +46,10 @@ export default function CourseDetail() {
             <Header />
 
             <Container maxWidth="md" sx={{ mt: 4, mb: 6 }}>
-                {/* --- Tiêu đề + Chuyên ngành + Giá + [Xem khóa khác] --- */}
                 <Typography variant="h4" align="center" gutterBottom>
                     {course.name}
                 </Typography>
 
-                {/* --- Ảnh bìa --- */}
                 <Card sx={{ mb: 3 }}>
                     <CardMedia
                         component="img"
@@ -79,7 +75,6 @@ export default function CourseDetail() {
                     </Typography>
                 </Box>
 
-                {/* --- Nội dung Markdown --- */}
                 <Box sx={{ p: 2, border: 1, borderColor: 'divider', borderRadius: 2, bgcolor: '#fafafa' }}>
                     <Section title="Đối tượng phù hợp">
                         {course.suitable || 'Chưa có thông tin.'}
@@ -94,7 +89,6 @@ export default function CourseDetail() {
                     </Section>
                 </Box>
 
-                {/* --- Video giới thiệu --- */}
                 {course.promoVideo && (
                     <>
                         <Divider sx={{ my: 3 }} />
@@ -122,11 +116,9 @@ export default function CourseDetail() {
                     </Button>
                 </Box>
 
-                {/* --- Các lớp sắp mở --- */}
                 <Divider sx={{ my: 4 }} />
                 <Typography variant="h5" align="center" gutterBottom>Các lớp sắp mở</Typography>
                 {upcoming.length > 0 ? (
-                    // <Grid container spacing={2}>
                     <Grid container spacing={2} justifyContent="center">
                         {upcoming.map(cl => (
                             <Grid item xs={12} sm={6} md={5} key={cl.id}>
@@ -165,7 +157,6 @@ export default function CourseDetail() {
     )
 }
 
-// Utility component
 function Section({ title, children }) {
     return (
         <Box>

@@ -14,11 +14,9 @@ export default function Categories() {
     const [categories, setCategories] = useState([]);
 
     useEffect(() => {
-        // 1. Lấy danh sách chuyên ngành
         api.get("/api/categories?size=100")
             .then(res => {
                 const cats = res.data.data.content;
-                // 2. Với mỗi chuyên ngành, fetch các khóa học
                 return Promise.all(cats.map(cat =>
                     api.get("/api/courses", { params: { categoryId: cat.id, size: 100 } })
                         .then(r => ({ ...cat, courses: r.data.data.content }))
@@ -38,7 +36,6 @@ export default function Categories() {
             <Header />
 
             <Box sx={{ display: "flex", mt: 4, mb: 6 }}>
-                {/* Sidebar */}
                 <Box
                     component="nav"
                     sx={{
@@ -73,7 +70,6 @@ export default function Categories() {
                     </List>
                 </Box>
 
-                {/* Main */}
                 <Container maxWidth="lg">
                     <Typography variant="h4" gutterBottom sx={{ color: "primary.dark" }}>
                         Danh sách khóa học theo chuyên ngành
@@ -111,7 +107,7 @@ export default function Categories() {
                                                 <Card
                                                     elevation={3}
                                                     sx={{
-                                                        height: "100%",           // fill height
+                                                        height: "100%",
                                                         display: "flex",
                                                         flexDirection: "column",
                                                         borderRadius: 2,
@@ -123,7 +119,7 @@ export default function Categories() {
                                                         component={RouterLink}
                                                         to={`/courses/${course.id}`}
                                                         sx={{
-                                                            flexGrow: 1,          // stretch clickable area
+                                                            flexGrow: 1,
                                                             display: "flex",
                                                             flexDirection: "column",
                                                         }}
@@ -138,7 +134,7 @@ export default function Categories() {
                                                         </Box>
 
                                                         <CardContent sx={{
-                                                            flexGrow: 1,        // push actions to bottom
+                                                            flexGrow: 1,
                                                             display: "flex",
                                                             flexDirection: "column",
                                                             justifyContent: "center",

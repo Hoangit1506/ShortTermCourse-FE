@@ -29,7 +29,6 @@ export default function AdminLecturerEdit() {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    // load categories and lecturer data
     useEffect(() => {
         api.get('/api/categories?size=100')
             .then(res => setCategories(res.data.data.content))
@@ -53,7 +52,6 @@ export default function AdminLecturerEdit() {
             .catch(console.error);
     }, [id]);
 
-    // cleanup object URLs
     useEffect(() => {
         return () => {
             if (form.avatarPreview) URL.revokeObjectURL(form.avatarPreview);
@@ -68,14 +66,12 @@ export default function AdminLecturerEdit() {
         setLoading(true);
         try {
             let avatarUrl = form.avatar;
-            // upload new avatar if selected
             if (form.avatarFile) {
                 const fd = new FormData();
                 fd.append('file', form.avatarFile);
                 avatarUrl = await api.post('/api/uploads/avatar', fd)
                     .then(r => r.data.data);
             }
-            // prepare payload
             const payload = {
                 displayName: form.displayName,
                 dob: form.dob,
@@ -164,7 +160,6 @@ export default function AdminLecturerEdit() {
                 </Select>
             </FormControl>
 
-            {/* Các chuyên ngành đã chọn, hiển thị chip riêng bên dưới */}
             <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                 {form.specializationIds.map(id => {
                     const cat = categories.find(c => c.id === id);
@@ -185,7 +180,6 @@ export default function AdminLecturerEdit() {
             </Box>
 
 
-            {/* Avatar upload */}
             <Box mt={2} sx={{ textAlign: 'center' }}>
                 <Button variant="outlined" component="label">
                     Chọn ảnh đại diện

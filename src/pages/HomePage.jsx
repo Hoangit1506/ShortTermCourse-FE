@@ -8,7 +8,6 @@ export default function HomePage() {
         <>
             <Header />
 
-            {/* Hero section */}
             <Box
                 sx={{
                     height: 650,
@@ -27,7 +26,6 @@ export default function HomePage() {
                 </Typography>
             </Box>
 
-            {/* Giới thiệu hệ thống */}
             <Container maxWidth="md" sx={{ py: 6 }}>
                 <Typography variant="h4" gutterBottom align="center">
                     Hệ thống đào tạo ngắn hạn chất lượng cao
@@ -49,7 +47,6 @@ export default function HomePage() {
                 </ul>
             </Container>
 
-            {/* Footer */}
             <Footer />
         </>
     );

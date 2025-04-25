@@ -29,14 +29,12 @@ export default function CourseCreate() {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    // Load categories
     useEffect(() => {
         api.get('/api/categories?size=100')
             .then(res => setCategories(res.data.data.content))
             .catch(console.error);
     }, []);
 
-    // Cleanup object URLs
     useEffect(() => {
         return () => {
             if (form.thumbnailPreview) URL.revokeObjectURL(form.thumbnailPreview);
@@ -47,7 +45,6 @@ export default function CourseCreate() {
     const handleSubmit = async () => {
         setLoading(true);
         try {
-            // 1️⃣ Tạo khóa học (metadata)
             const created = await api.post('/api/courses/create', {
                 name: form.name,
                 categoryId: form.categoryId,
@@ -59,7 +56,6 @@ export default function CourseCreate() {
 
             alert('Khóa học đã được tạo! Tiếp tục upload hình ảnh và video...');
 
-            // 2️⃣ Upload thumbnail nếu có
             if (form.thumbnailFile) {
                 const fd = new FormData();
                 fd.append('file', form.thumbnailFile);
@@ -68,7 +64,6 @@ export default function CourseCreate() {
                 await api.put(`/api/courses/update/${created.id}`, { thumbnail: thumbUrl });
             }
 
-            // 3️⃣ Upload promo video nếu có
             if (form.promoVideoFile) {
                 if (form.promoVideoFile.size > MAX_VIDEO_SIZE) {
                     alert('Video quá lớn (>100MB), bỏ qua upload video.');
@@ -88,7 +83,6 @@ export default function CourseCreate() {
             }
 
             alert('Tạo khóa học hoàn tất!');
-            // Reset form để tạo tiếp
             setForm(initialForm);
         } catch (err) {
             console.error('Lỗi tạo khóa học:', err);
@@ -141,7 +135,6 @@ export default function CourseCreate() {
                 <MDEditor value={form.content} onChange={v => setForm({ ...form, content: v || '' })} />
             </Box>
 
-            {/* Upload thumbnail */}
             <Box mt={2} sx={{ textAlign: 'center' }}>
                 <Button variant="outlined" component="label">
                     Chọn ảnh thumbnail
@@ -171,7 +164,6 @@ export default function CourseCreate() {
                 )}
             </Box>
 
-            {/* Upload promo video */}
             <Box mt={2} sx={{ textAlign: 'center' }}>
                 <Button variant="outlined" component="label">
                     Chọn video giới thiệu
@@ -205,7 +197,6 @@ export default function CourseCreate() {
                 )}
             </Box>
 
-            {/* Actions */}
             <Box mt={3}>
                 <Button variant="contained" onClick={handleSubmit} disabled={loading}>
                     {loading ? <CircularProgress size={24} /> : 'Tạo khóa học'}

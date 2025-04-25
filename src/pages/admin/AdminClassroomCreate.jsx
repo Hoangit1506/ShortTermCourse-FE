@@ -12,7 +12,6 @@ export default function AdminClassroomCreate() {
     const [searchParams] = useSearchParams();
     const qs = searchParams.toString() ? `?${searchParams.toString()}` : '';
 
-    // Form state
     const [form, setForm] = useState({
         categoryId: '',
         courseId: '',
@@ -30,7 +29,6 @@ export default function AdminClassroomCreate() {
     const [lecturers, setLecturers] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    // Load master data
     useEffect(() => {
         api.get('/api/categories?size=100')
             .then(r => setCategories(r.data.data.content));
@@ -40,7 +38,6 @@ export default function AdminClassroomCreate() {
             .then(r => setAllLecturers(r.data.data.content));
     }, []);
 
-    // Filter courses & lecturers when category changes
     useEffect(() => {
         if (!form.categoryId) {
             setCourses(allCourses);
@@ -49,7 +46,6 @@ export default function AdminClassroomCreate() {
             setCourses(allCourses.filter(c => c.categoryId === form.categoryId));
             setLecturers(allLecturers.filter(l => l.specializationIds?.includes(form.categoryId)));
         }
-        // clear dependent selections
         setForm(f => ({ ...f, courseId: '', lecturerId: '' }));
     }, [form.categoryId, allCourses, allLecturers]);
 
@@ -59,7 +55,6 @@ export default function AdminClassroomCreate() {
     };
 
     const handleSubmit = async () => {
-        // Basic validation
         const { name, courseId, lecturerId, startDate, endDate, place, capacity } = form;
         if (!name || !courseId || !lecturerId || !startDate || !endDate || !place || !capacity) {
             alert('Vui lòng điền đầy đủ thông tin');

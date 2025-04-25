@@ -9,7 +9,7 @@ import HomeIcon from '@mui/icons-material/Home';
 
 export default function UserLayout() {
     const menu = [
-        { label: 'Hồ sơ', to: '/user/profile' },
+        // { label: 'Hồ sơ', to: '/user/profile' },
         { label: 'Khóa học của tôi', to: '/user/my-courses' },
     ];
 

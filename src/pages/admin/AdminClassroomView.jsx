@@ -88,7 +88,6 @@ export default function AdminClassroomView() {
     );
 }
 
-// 👉 Component tái sử dụng cho mỗi dòng
 function InfoRow({ label, value }) {
     return (
         <Box display="flex">

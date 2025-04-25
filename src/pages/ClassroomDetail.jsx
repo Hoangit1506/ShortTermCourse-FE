@@ -3,7 +3,8 @@ import React, { useState, useEffect } from 'react';
 import {
     Container, Box, Paper, Typography, Divider,
     Button, CircularProgress, Stack, CardMedia,
-    Dialog, DialogTitle, DialogContent, DialogActions
+    Dialog, DialogTitle, DialogContent, DialogActions,
+    Snackbar, Alert as MuiAlert
 } from '@mui/material';
 import {
     useParams,
@@ -22,7 +23,6 @@ export default function ClassroomDetail() {
     const navigate = useNavigate();
     const { user } = useAuth();
 
-    // lấy query‑params cũ bên OpenCourses
     const [searchParams] = useSearchParams();
     const qs = searchParams.toString() ? `?${searchParams.toString()}` : '';
 
@@ -32,9 +32,10 @@ export default function ClassroomDetail() {
     const [checking, setChecking] = useState(true);
     const [registered, setRegistered] = useState(false);
     const [dialogOpen, setDialogOpen] = useState(false);
+    const [loginDialogOpen, setLoginDialogOpen] = useState(false);
     const [submitting, setSubmitting] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
 
-    // 1️⃣ Load thông tin lớp
     useEffect(() => {
         api.get(`/api/classrooms/${id}`)
             .then(res => setCls(res.data.data))
@@ -42,7 +43,6 @@ export default function ClassroomDetail() {
             .finally(() => setLoading(false));
     }, [id]);
 
-    // 2️⃣ Load thông tin khóa học
     useEffect(() => {
         if (!cls) return;
         api.get(`/api/courses/${cls.courseId}`)
@@ -50,7 +50,6 @@ export default function ClassroomDetail() {
             .catch(() => setCourse(null));
     }, [cls]);
 
-    // 3️⃣ Kiểm tra xem user đã đăng ký chưa
     useEffect(() => {
         if (!user) {
             setChecking(false);
@@ -62,20 +61,27 @@ export default function ClassroomDetail() {
             .finally(() => setChecking(false));
     }, [id, user]);
 
-    // 4️⃣ Tính xem đã quá hạn đăng ký không?
     const expired = cls
         ? dayjs().isAfter(dayjs(cls.startDate), 'day')
         : false;
+
+    const handleRegisterClick = () => {
+        if (!user) {
+            setLoginDialogOpen(true);
+        } else {
+            setDialogOpen(true);
+        }
+    };
 
     const handleConfirmRegister = async () => {
         setSubmitting(true);
         try {
             await api.post('/api/members', { classroomId: id });
-            // reload lớp to update enrolled
             const clsRes = await api.get(`/api/classrooms/${id}`);
             setCls(clsRes.data.data);
             setRegistered(true);
             setDialogOpen(false);
+            setSuccessMessage(`Đã đăng ký khóa học ${course?.name || ''} thành công`);
         } catch (err) {
             alert(err.response?.data?.message || 'Đăng ký thất bại');
         } finally {
@@ -83,7 +89,10 @@ export default function ClassroomDetail() {
         }
     };
 
-    // loading / not found
+    const handleCloseSnackbar = () => {
+        setSuccessMessage('');
+    };
+
     if (loading) {
         return <>
             <Header />
@@ -107,7 +116,6 @@ export default function ClassroomDetail() {
             <Container maxWidth="md" sx={{ mt: 4, mb: 6 }}>
                 <Paper sx={{ p: 4 }} elevation={3}>
 
-                    {/* ===== Thông tin Lớp ===== */}
                     <Typography variant="h5" fontWeight="bold" color="primary">
                         Thông tin Lớp học
                     </Typography>
@@ -131,7 +139,6 @@ export default function ClassroomDetail() {
                         ))}
                     </Stack>
 
-                    {/* ===== Nút hành động ===== */}
                     <Box mt={4} textAlign="center">
                         {checking ? (
                             <CircularProgress size={24} />
@@ -151,24 +158,22 @@ export default function ClassroomDetail() {
                             <Button
                                 variant="contained"
                                 color="primary"
-                                onClick={() => setDialogOpen(true)}
+                                onClick={handleRegisterClick}
                             >
                                 Đăng ký
                             </Button>
                         )}
 
-                        {/* luôn hiện nút Quay lại giữ nguyên filter/pagination */}
-                        &nbsp;
                         <Button
                             variant="outlined"
                             component={RouterLink}
                             to={`/courses/open-course${qs}`}
+                            sx={{ ml: 2 }}
                         >
                             Quay lại
                         </Button>
                     </Box>
 
-                    {/* ===== Dialog xác nhận ===== */}
                     <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
                         <DialogTitle>Xác nhận đăng ký</DialogTitle>
                         <DialogContent>
@@ -193,7 +198,41 @@ export default function ClassroomDetail() {
                         </DialogActions>
                     </Dialog>
 
-                    {/* ===== Thông tin Khóa học ===== */}
+                    <Dialog open={loginDialogOpen} onClose={() => setLoginDialogOpen(false)}>
+                        <DialogTitle>Thông báo</DialogTitle>
+                        <DialogContent>
+                            <Typography>
+                                Bạn cần phải đăng nhập trước khi đăng ký khóa học.
+                            </Typography>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={() => setLoginDialogOpen(false)}>
+                                Đóng
+                            </Button>
+                            <Button
+                                variant="contained"
+                                component={RouterLink}
+                                to="/login"
+                            >
+                                Đăng nhập
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
+
+                    <Snackbar
+                        open={!!successMessage}
+                        autoHideDuration={6000}
+                        onClose={handleCloseSnackbar}
+                    >
+                        <MuiAlert
+                            onClose={handleCloseSnackbar}
+                            severity="success"
+                            sx={{ width: '100%' }}
+                        >
+                            {successMessage}
+                        </MuiAlert>
+                    </Snackbar>
+
                     <Box mt={4}>
                         <Divider sx={{ my: 2 }} />
                         <Typography variant="h5" fontWeight="bold" color="primary">
@@ -202,31 +241,24 @@ export default function ClassroomDetail() {
 
                         {course ? (
                             <Stack spacing={2}>
-                                {/* Ảnh bìa */}
                                 <CardMedia
                                     component="img"
                                     image={course.thumbnail || '/placeholder.png'}
                                     alt={course.name}
                                     sx={{ width: '100%', height: 240, objectFit: 'cover', borderRadius: 1 }}
                                 />
-
-                                {/* Tên */}
                                 <Box>
                                     <Typography variant="subtitle2" fontWeight="bold">
                                         Tên khóa học
                                     </Typography>
                                     <Typography variant="body1">{course.name}</Typography>
                                 </Box>
-
-                                {/* Chuyên ngành */}
                                 <Box>
                                     <Typography variant="subtitle2" fontWeight="bold">
                                         Chuyên ngành
                                     </Typography>
                                     <Typography variant="body1">{course.categoryName}</Typography>
                                 </Box>
-
-                                {/* Giá */}
                                 <Box>
                                     <Typography variant="subtitle2" fontWeight="bold">
                                         Giá
@@ -239,8 +271,6 @@ export default function ClassroomDetail() {
                                         }).format(course.price)}
                                     </Typography>
                                 </Box>
-
-                                {/* Đối tượng phù hợp */}
                                 {course.suitable && (
                                     <Box>
                                         <Typography variant="subtitle2" fontWeight="bold">
@@ -249,11 +279,12 @@ export default function ClassroomDetail() {
                                         <Typography variant="body1">{course.suitable}</Typography>
                                     </Box>
                                 )}
-
-                                {/* Mô tả */}
                                 {course.description && (
                                     <Box>
-                                        <Typography variant="subtitle2" fontWeight="bold">
+                                        <Typography
+                                            variant="subtitle2"
+                                            fontWeight="bold"
+                                        >
                                             Mô tả
                                         </Typography>
                                         <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>
@@ -261,8 +292,6 @@ export default function ClassroomDetail() {
                                         </Typography>
                                     </Box>
                                 )}
-
-                                {/* Nội dung khóa học */}
                                 {course.content && (
                                     <Box>
                                         <Typography variant="subtitle2" fontWeight="bold">
@@ -273,8 +302,6 @@ export default function ClassroomDetail() {
                                         </Typography>
                                     </Box>
                                 )}
-
-                                {/* Video giới thiệu */}
                                 {course.promoVideo && (
                                     <Box>
                                         <Typography variant="subtitle2" fontWeight="bold" mb={1}>

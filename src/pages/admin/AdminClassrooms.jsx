@@ -14,7 +14,6 @@ export default function AdminClassrooms() {
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
 
-    // URL params
     const keywordParam = searchParams.get('keyword') || '';
     const categoryParam = searchParams.get('categoryId') || '';
     const courseParam = searchParams.get('courseId') || '';
@@ -22,7 +21,6 @@ export default function AdminClassrooms() {
     const pageParam = parseInt(searchParams.get('page') || '0', 10);
     const sizeParam = parseInt(searchParams.get('size') || '10', 10);
 
-    // State
     const [keyword, setKeyword] = useState(keywordParam);
     const [categoryId, setCategoryId] = useState(categoryParam);
     const [courseId, setCourseId] = useState(courseParam);
@@ -39,19 +37,16 @@ export default function AdminClassrooms() {
     const [allCourses, setAllCourses] = useState([]);
     const [allLecturers, setAllLecturers] = useState([]);
 
-    // Load master data
     useEffect(() => {
         api.get('/api/categories?size=100')
             .then(res => setCategories(res.data.data.content));
     }, []);
 
     useEffect(() => {
-        // 1️⃣ Load danh mục
         api.get('/api/categories?size=100')
             .then(r => setCategories(r.data.data.content))
             .catch(console.error);
 
-        // 2️⃣ Load toàn bộ khóa học + giảng viên
         api.get('/api/courses', { params: { size: 100 } })
             .then(r => setAllCourses(r.data.data.content))
             .catch(console.error);
@@ -60,7 +55,6 @@ export default function AdminClassrooms() {
             .catch(console.error);
     }, []);
 
-    // filtered lists
     useEffect(() => {
         if (!categoryId) {
             setCourses(allCourses);
@@ -75,13 +69,11 @@ export default function AdminClassrooms() {
                 )
             );
         }
-        // reset con filters
         setCourseId('');
         setLecturerId('');
     }, [categoryId, allCourses, allLecturers]);
 
 
-    // Fetch classrooms on filter change
     useEffect(() => {
         const params = { page, size: rowsPerPage };
         if (keyword) params.keyword = keyword;
@@ -100,7 +92,6 @@ export default function AdminClassrooms() {
     const handleDelete = async (id) => {
         if (!window.confirm('Bạn chắc chắn muốn xóa lớp này?')) return;
         await api.delete(`/api/classrooms/delete/${id}`);
-        // reload current filters
         const params = Object.fromEntries([...searchParams]);
         api.get('/api/classrooms/admin', { params })
             .then(res => {
@@ -112,7 +103,6 @@ export default function AdminClassrooms() {
     return (
         <Box>
             <Typography variant="h4" gutterBottom color="primary" fontWeight="bold">Quản lý Lớp học</Typography>
-            {/* filters row */}
             <Box sx={{ display: 'flex', gap: 2, mb: 2, alignItems: 'center' }}>
                 <TextField
                     label="Tìm theo tên lớp"
@@ -163,7 +153,6 @@ export default function AdminClassrooms() {
                 </Button>
             </Box>
 
-            {/* table */}
             <Table>
                 <TableHead>
                     <TableRow>
@@ -209,7 +198,6 @@ export default function AdminClassrooms() {
                 </TableBody>
             </Table>
 
-            {/* pagination */}
             <TablePagination
                 component="div"
                 count={total}

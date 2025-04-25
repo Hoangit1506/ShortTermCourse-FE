@@ -12,7 +12,6 @@ export default function AdminCourses() {
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
 
-    // Đọc từ URL hoặc dùng mặc định
     const keywordParam = searchParams.get('keyword') || '';
     const categoryParam = searchParams.get('categoryId') || '';
     const pageParam = parseInt(searchParams.get('page') || '0', 10);
@@ -26,14 +25,12 @@ export default function AdminCourses() {
     const [rowsPerPage, setRowsPerPage] = useState(rowsPerPageParam);
     const [totalItems, setTotalItems] = useState(0);
 
-    // Load danh sách chuyên ngành vào dropdown
     useEffect(() => {
         api.get('/api/categories?size=100')
             .then(res => setCategories(res.data.data.content))
             .catch(console.error);
     }, []);
 
-    // Mỗi khi filter/pagination thay đổi -> cập nhật URL và fetch lại
     useEffect(() => {
         const params = {};
         if (search) params.keyword = search;
@@ -42,7 +39,6 @@ export default function AdminCourses() {
         if (rowsPerPage) params.size = rowsPerPage;
         setSearchParams(params, { replace: true });
         fetchCourses(params);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [search, selectedCategory, page, rowsPerPage]);
 
     const fetchCourses = (params = {}) => {
@@ -73,7 +69,6 @@ export default function AdminCourses() {
         style: 'currency', currency: 'VND', maximumFractionDigits: 0
     }).format(value);
 
-    // Khi navigate to detail/edit, ta bám đuôi query string:
     const qs = searchParams.toString() ? `?${searchParams.toString()}` : '';
 
     return (
@@ -82,7 +77,6 @@ export default function AdminCourses() {
                 Quản lý khóa học
             </Typography>
 
-            {/* Filters & actions */}
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 2 }}>
                 <TextField
                     label="Tìm kiếm theo tên"
@@ -100,7 +94,6 @@ export default function AdminCourses() {
                     onChange={e => { setSelectedCategory(e.target.value); setPage(0); }}
                     sx={{ minWidth: 200 }}
                 >
-                    {/* cho phép chọn lại “Tất cả” */}
                     <MenuItem value="">
                         <em>Tất cả chuyên ngành</em>
                     </MenuItem>
@@ -118,7 +111,6 @@ export default function AdminCourses() {
                 </Button>
             </Box>
 
-            {/* Course table */}
             <Table>
                 <TableHead>
                     <TableRow>
@@ -161,7 +153,6 @@ export default function AdminCourses() {
                 </TableBody>
             </Table>
 
-            {/* Pagination */}
             <TablePagination
                 component="div"
                 count={totalItems}

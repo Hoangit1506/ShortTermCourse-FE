@@ -13,14 +13,12 @@ import Footer from '../components/Footer';
 export default function CourseList() {
     const [searchParams, setSearchParams] = useSearchParams();
 
-    // 1️⃣ Đọc query‑params
     const keywordParam = searchParams.get("keyword") || "";
     const categoryIdParam = searchParams.get("categoryId") || "";
     const sortParam = searchParams.get("sort") || "asc";
     const pageParam = parseInt(searchParams.get("page") || "0", 10);
     const sizeParam = parseInt(searchParams.get("size") || "10", 10);
 
-    // 2️⃣ State cho filter và dữ liệu
     const [filter, setFilter] = useState({
         keyword: keywordParam,
         categoryId: categoryIdParam,
@@ -32,14 +30,12 @@ export default function CourseList() {
     const [total, setTotal] = useState(0);
     const [categories, setCategories] = useState([]);
 
-    // 3️⃣ Load danh sách chuyên ngành
     useEffect(() => {
         api.get('/api/categories?size=100')
             .then(res => setCategories(res.data.data.content))
             .catch(console.error);
     }, []);
 
-    // 4️⃣ Fetch dữ liệu mỗi khi filter hoặc phân trang thay đổi
     useEffect(() => {
         const params = {
             page,
@@ -60,7 +56,6 @@ export default function CourseList() {
             .catch(console.error);
     }, [filter, page, rowsPerPage]);
 
-    // 5️⃣ Handlers
     const handleFilterChange = e => {
         const { name, value } = e.target;
         setFilter(f => ({ ...f, [name]: value }));
@@ -81,7 +76,6 @@ export default function CourseList() {
                     Danh sách khóa học
                 </Typography>
 
-                {/* ===== Bộ lọc ===== */}
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 3 }}>
                     <TextField
                         size="small"
@@ -121,7 +115,6 @@ export default function CourseList() {
                     </FormControl>
                 </Box>
 
-                {/* ===== Danh sách khóa học ===== */}
                 <Grid container spacing={3}>
                     {courses.map(course => (
                         <Grid item xs={12} sm={6} md={4} key={course.id}>
@@ -161,7 +154,6 @@ export default function CourseList() {
                     ))}
                 </Grid>
 
-                {/* ===== Phân trang ===== */}
                 <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
                     <TablePagination
                         component="div"

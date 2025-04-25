@@ -4,7 +4,7 @@ import {
     Box, Drawer, List, ListItemButton,
     ListItemText, Toolbar, Typography, IconButton
 } from '@mui/material';
-import HomeIcon from '@mui/icons-material/Home'; // Import icon
+import HomeIcon from '@mui/icons-material/Home';
 
 export default function AdminLayout() {
     const menu = [
@@ -27,7 +27,6 @@ export default function AdminLayout() {
                 >
                     <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
                         <Typography variant="h6">Admin</Typography>
-                        {/* Nút quay về trang chủ */}
                         <IconButton
                             component={RouterLink}
                             to="/"
